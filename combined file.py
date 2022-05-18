@@ -13,35 +13,31 @@ servo.start(currAngl)
 
 def servoAngle(angle, curr):
 	turns = angle*0.066666667
-	currAngl = curr
 	if turns < currAngl:
 
-		while currAngl > turns:
-			currAngl  -= 0.3
-			servo.ChangeDutyCycle(currAngl)
+		while curr > turns:
+			curr  -= 0.3
+			servo.ChangeDutyCycle(curr)
 			time.sleep(0.05)
 			
-	elif turns > currAngl:
-		while currAngl < turns:
-			currAngl += 0.3
-			servo.ChangeDutyCycle(currAngl)
+	elif turns > curr:
+		while curr < turns:
+			curr += 0.3
+			servo.ChangeDutyCycle(curr)
 			time.sleep(0.05)
-	return currAngl
+	return curr
 
 		
 
-currAngl = servoAngle(180, currAngl)
-time.sleep(2)
-currAngl = servoAngle(90, currAngl)
-time.sleep(2)
-
-
 
 def data(mqttclient, userdata, message):
-    if(message.topic == TEMPERATURE and message.payload.decode("utf-8") > 25.00):
-        currAngl = servoAngle(180, currAngl)
-    else:
-        currAngl = servoAngle(90, currAngl)
+    global currAngl
+    if(message.topic == "TEMPERATURE" and float(message.payload.decode("utf-8")) > 25.00):
+        if currAngl < 11:
+            currAngl = servoAngle(180, currAngl)
+    elif(message.topic=="TEMPERATURE" and float(message.payload.decode("utf-8")) <= 25.00):
+        if currAngl > 6:        
+            currAngl = servoAngle(90, currAngl)
 #	p = influxdb_client.Point("data").tag("location", "plantbox#1").field(message.topic, float(message.payload.decode("utf-8")))
 
 
